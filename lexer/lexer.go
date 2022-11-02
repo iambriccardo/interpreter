@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"monkey/token"
 )
 
@@ -29,13 +30,15 @@ func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
+func newTokenWithStr(tokenType token.TokenType, str string) token.Token {
+	return token.Token{Type: tokenType, Literal: str}
+}
+
 func (l *Lexer) readCharUntil(block func(byte) bool) string {
 	position := l.position
-
 	for block(l.ch) {
 		l.readChar()
 	}
-
 	return l.input[position:l.position]
 }
 
@@ -53,6 +56,25 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
+func (l *Lexer) peekAhead() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+}
+
+func (l *Lexer) peekAheadAndReturnIf(expectedChar string) (string, error) {
+	if l.peekAhead() == []byte(expectedChar)[0] {
+		previousChar := l.ch
+		l.readChar()
+		currentChar := l.ch
+		return string([]byte{previousChar, currentChar}), nil
+	} else {
+		return "", fmt.Errorf("the next char doesn't match the expected char")
+	}
+}
+
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
@@ -67,13 +89,21 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		if str, err := l.peekAheadAndReturnIf("="); err == nil {
+			tok = newTokenWithStr(token.EQ, str)
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
 	case '-':
 		tok = newToken(token.MINUS, l.ch)
 	case '!':
-		tok = newToken(token.BANG, l.ch)
+		if str, err := l.peekAheadAndReturnIf("="); err == nil {
+			tok = newTokenWithStr(token.NOT_EQ, str)
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
 	case '/':
 		tok = newToken(token.SLASH, l.ch)
 	case '*':
