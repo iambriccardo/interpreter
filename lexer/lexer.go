@@ -8,22 +8,22 @@ import (
 type Lexer struct {
 	input        string
 	position     int  // current position in input
-	readPosition int  // current reading position in input
+	peekPosition int  // current peeking position in input
 	ch           byte // current char under examination
 }
 
 // TODO: support unicode with "rune" type
 // Gives us the next character and advances our position.
 func (l *Lexer) readChar() {
-	if l.readPosition >= len(l.input) {
+	if l.peekPosition >= len(l.input) {
 		// ASCII code for "NUL" character
 		l.ch = 0
 	} else {
-		l.ch = l.input[l.readPosition]
+		l.ch = l.input[l.peekPosition]
 	}
 
-	l.position = l.readPosition
-	l.readPosition += 1
+	l.position = l.peekPosition
+	l.peekPosition += 1
 }
 
 func newToken(tokenType token.TokenType, ch byte) token.Token {
@@ -57,10 +57,10 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) peekAhead() byte {
-	if l.readPosition >= len(l.input) {
+	if l.peekPosition >= len(l.input) {
 		return 0
 	} else {
-		return l.input[l.readPosition]
+		return l.input[l.peekPosition]
 	}
 }
 
