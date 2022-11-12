@@ -182,6 +182,7 @@ func (oe *InfixExpression) String() string {
 	return out.String()
 }
 
+// e.g. variable_name
 type Identifier struct {
 	Token token.Token
 	Value string
@@ -195,4 +196,20 @@ func (i *Identifier) TokenLiteral() string {
 
 func (i *Identifier) String() string {
 	return i.Value
+}
+
+// e.g. true
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (b *Boolean) expressionNode() {}
+
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+func (b *Boolean) String() string {
+	return b.Token.Literal
 }

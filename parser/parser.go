@@ -102,6 +102,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
+// This function contains the logic of Pratt parsing.
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currToken.Type]
 	if prefix == nil {
@@ -130,9 +131,7 @@ func (p *Parser) parseIdentifier() ast.Expression {
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
-	lit := &ast.IntegerLiteral{Token: p.currToken}
-
-	value, err := strconv.ParseInt(p.currToken.Literal, 0, 64)
+	intValue, err := strconv.ParseInt(p.currToken.Literal, 0, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer", p.currToken.Literal)
 		p.errors = append(p.errors, msg)
@@ -140,9 +139,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		return nil
 	}
 
-	lit.Value = value
-
-	return lit
+	return &ast.IntegerLiteral{Token: p.currToken, Value: intValue}
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
@@ -170,6 +167,31 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	expression.Right = p.parseExpression(precedence)
 
 	return expression
+}
+
+func (p *Parser) parseBoolean() ast.Expression {
+	boolValue, err := strconv.ParseBool(p.currToken.Literal)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as bool", p.currToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	return &ast.Boolean{Token: p.currToken, Value: boolValue}
+}
+
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken()
+
+	exp := p.parseExpression(LOWEST)
+
+	if !p.peekTokenIs(token.RPAREN) {
+		return nil
+	}
+
+	p.nextToken()
+
+	return exp
 }
 
 /* UTILS */
@@ -237,6 +259,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(token.TRUE, p.parseBoolean)
+	p.registerPrefix(token.FALSE, p.parseBoolean)
+	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
