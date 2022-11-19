@@ -211,42 +211,99 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		return nil
 	}
 
-    p.nextToken()
+	p.nextToken()
 
 	expression.Consequence = p.parseBlockStatement()
 
-    if p.peekTokenIs(token.ELSE) {
-        p.nextToken()
+	if p.peekTokenIs(token.ELSE) {
+		p.nextToken()
 
-        if !p.peekTokenIs(token.LBRACE) {
-            return nil
-        }
+		if !p.peekTokenIs(token.LBRACE) {
+			return nil
+		}
 
-        p.nextToken()
+		p.nextToken()
 
-        expression.Alternative = p.parseBlockStatement()
-    }
+		expression.Alternative = p.parseBlockStatement()
+	}
 
 	return expression
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	block := &ast.BlockStatement{Token: p.currToken}
-    block.Statements = []ast.Statement{}
+	block.Statements = []ast.Statement{}
+
+	p.nextToken()
+
+	for !p.currTokenIs(token.RBRACE) && !p.currTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+
+		p.nextToken()
+	}
+
+    if p.currTokenIs(token.EOF) {
+        msg := fmt.Sprintf("the block is not terminated with '{'")
+        p.errors = append(p.errors, msg)
+        return nil
+    }
+
+	return block
+}
+
+func (p *Parser) parseFunctionLiteral() ast.Expression {
+    functionLiteral := &ast.FunctionLiteral{Token: p.currToken}
+
+    if !p.peekTokenIs(token.LPAREN) {
+        return nil
+    }
 
     p.nextToken()
 
-    for !p.currTokenIs(token.RBRACE) && !p.currTokenIs(token.EOF) {
-        stmt := p.parseStatement()
+    functionLiteral.Parameters = p.parseFunctionParameters()
 
-        if stmt != nil {
-            block.Statements = append(block.Statements, stmt)
-        }
-
-        p.nextToken()
+    if !p.peekTokenIs(token.LBRACE) {
+        return nil
     }
 
-    return block
+    p.nextToken()
+
+    functionLiteral.Body = p.parseBlockStatement()
+
+    return functionLiteral
+}
+
+func (p *Parser) parseFunctionParameters() []*ast.Identifier {
+    identifiers := []*ast.Identifier{}
+
+    if p.peekTokenIs(token.RPAREN) {
+        p.nextToken()
+        return identifiers
+    }
+
+    p.nextToken()
+    ident := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+    identifiers = append(identifiers, ident)
+
+    for p.peekTokenIs(token.COMMA) {
+        p.nextToken()
+        p.nextToken()
+
+        ident := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+        identifiers = append(identifiers, ident)
+    }
+
+    if !p.peekTokenIs(token.RPAREN) {
+        return nil
+    }
+
+    p.nextToken()
+
+    return identifiers
 }
 
 /* UTILS */
@@ -318,6 +375,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FALSE, p.parseBoolean)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
+    p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
