@@ -44,7 +44,7 @@ func (p *Program) String() string {
 	return out.String()
 }
 
-// e.g. let variable = 10;
+// let variable = 10;
 type LetStatement struct {
 	Token token.Token
 	Name  *Identifier
@@ -71,7 +71,7 @@ func (ls *LetStatement) String() string {
 	return out.String()
 }
 
-// e.g. return 10;
+// return 10;
 type ReturnStatement struct {
 	Token       token.Token
 	ReturnValue Expression
@@ -115,7 +115,7 @@ func (es *ExpressionStatement) String() string {
 	return ""
 }
 
-// e.g. 5
+// 5
 type IntegerLiteral struct {
 	Token token.Token
 	Value int64
@@ -131,7 +131,7 @@ func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
 
-// e.g. !5
+// !5
 type PrefixExpression struct {
 	Token    token.Token
 	Operator string
@@ -156,7 +156,7 @@ func (pe *PrefixExpression) String() string {
 
 }
 
-// e.g. 2 + 4
+// 2 + 4
 type InfixExpression struct {
 	Token    token.Token // The operator token, e.g. +
 	Left     Expression
@@ -182,7 +182,7 @@ func (oe *InfixExpression) String() string {
 	return out.String()
 }
 
-// e.g. variable_name
+// variable_name
 type Identifier struct {
 	Token token.Token
 	Value string
@@ -198,7 +198,7 @@ func (i *Identifier) String() string {
 	return i.Value
 }
 
-// e.g. true
+// true
 type Boolean struct {
 	Token token.Token
 	Value bool
@@ -212,4 +212,56 @@ func (b *Boolean) TokenLiteral() string {
 
 func (b *Boolean) String() string {
 	return b.Token.Literal
+}
+
+// if (x > y) { x } else { y };
+type IfExpression struct {
+	Token       token.Token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (ie *IfExpression) expressionNode() {}
+
+func (ie *IfExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+func (ie *IfExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("if")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Consequence.String())
+
+	if ie.Alternative != nil {
+		out.WriteString("else ")
+		out.WriteString(ie.Alternative.String())
+	}
+
+	return out.String()
+}
+
+// { ... }
+type BlockStatement struct {
+	Token      token.Token
+	Statements []Statement
+}
+
+func (bs *BlockStatement) statementNode() {}
+
+func (bs *BlockStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
 }
