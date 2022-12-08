@@ -3,7 +3,7 @@ package lexer
 import (
 	"fmt"
 	"monkey/token"
-    "strings"
+	"strings"
 )
 
 type Lexer struct {
@@ -18,17 +18,17 @@ type Lexer struct {
 // Gives us the next character and advances our position.
 func (l *Lexer) readChar() {
 	if l.peekPosition >= len(l.input[l.inputLine]) {
-        // If we are at the end of the last line, we will return the NUL character, otherwise
-        // we should silently go to the next line.
-        if l.inputLine == len(l.input) - 1 {
-            // ASCII code for "NUL" character.
-            l.ch = 0
-        } else {
-            // ASCII code for "SOH" character.
-            l.ch = 1
-        }
+		// If we are at the end of the last line, we will return the NUL character, otherwise
+		// we should silently go to the next line.
+		if l.inputLine == len(l.input)-1 {
+			// ASCII code for "NUL" character.
+			l.ch = 0
+		} else {
+			// ASCII code for "SOH" character.
+			l.ch = 1
+		}
 	} else {
-        l.ch = l.input[l.inputLine][l.peekPosition]
+		l.ch = l.input[l.inputLine][l.peekPosition]
 	}
 
 	l.position = l.peekPosition
@@ -40,7 +40,7 @@ func (l *Lexer) readCharUntil(block func(byte) bool) string {
 	for block(l.ch) {
 		l.readChar()
 	}
-    return l.input[l.inputLine][position:l.position]
+	return l.input[l.inputLine][position:l.position]
 }
 
 func isLetter(ch byte) bool {
@@ -61,7 +61,7 @@ func (l *Lexer) peekAhead() byte {
 	if l.peekPosition >= len(l.input) {
 		return 0
 	} else {
-        return l.input[l.inputLine][l.peekPosition]
+		return l.input[l.inputLine][l.peekPosition]
 	}
 }
 
@@ -77,16 +77,16 @@ func (l *Lexer) peekAheadAndReturnIf(expectedChar string) (string, error) {
 }
 
 func (l *Lexer) nextLine() {
-    if l.inputLine < len(l.input) - 1 {
-        l.inputLine++
-        // We reset the position.
-        l.peekPosition = 0
-        l.position = 0
-    }
+	if l.inputLine < len(l.input)-1 {
+		l.inputLine++
+		// We reset the position.
+		l.peekPosition = 0
+		l.position = 0
+	}
 }
 
 func getLinesFromInput(input string) []string {
-    return strings.Split(input, "\n")
+	return strings.Split(input, "\n")
 }
 
 func New(input string) *Lexer {
@@ -101,9 +101,9 @@ func (l *Lexer) NextToken() token.Token {
 	// We continue reading until we find l.ch that is not a whitespace.
 	l.skipWhitespace()
 
-    // We add column and line information.
-    tok.Line = l.inputLine
-    tok.Column = l.position
+	// We add column and line information.
+	tok.Line = l.inputLine
+	tok.Column = l.position
 
 	switch l.ch {
 	case '=':
@@ -113,54 +113,54 @@ func (l *Lexer) NextToken() token.Token {
 			tok.AddChar(token.ASSIGN, l.ch)
 		}
 	case '+':
-        tok.AddChar(token.PLUS, l.ch)
+		tok.AddChar(token.PLUS, l.ch)
 	case '-':
-        tok.AddChar(token.MINUS, l.ch)
+		tok.AddChar(token.MINUS, l.ch)
 	case '!':
 		if str, err := l.peekAheadAndReturnIf("="); err == nil {
-            tok.AddStr(token.NOT_EQ, str)
+			tok.AddStr(token.NOT_EQ, str)
 		} else {
-            tok.AddChar(token.BANG, l.ch)
+			tok.AddChar(token.BANG, l.ch)
 		}
 	case '/':
-        tok.AddChar(token.SLASH, l.ch)
+		tok.AddChar(token.SLASH, l.ch)
 	case '*':
-        tok.AddChar(token.ASTERISK, l.ch)
+		tok.AddChar(token.ASTERISK, l.ch)
 	case '<':
-        tok.AddChar(token.LT, l.ch)
+		tok.AddChar(token.LT, l.ch)
 	case '>':
-        tok.AddChar(token.GT, l.ch)
+		tok.AddChar(token.GT, l.ch)
 	case ';':
-        tok.AddChar(token.SEMICOLON, l.ch)
+		tok.AddChar(token.SEMICOLON, l.ch)
 	case ',':
-        tok.AddChar(token.COMMA, l.ch)
+		tok.AddChar(token.COMMA, l.ch)
 	case '(':
-        tok.AddChar(token.LPAREN, l.ch)
+		tok.AddChar(token.LPAREN, l.ch)
 	case ')':
-        tok.AddChar(token.RPAREN, l.ch)
+		tok.AddChar(token.RPAREN, l.ch)
 	case '{':
-        tok.AddChar(token.LBRACE, l.ch)
+		tok.AddChar(token.LBRACE, l.ch)
 	case '}':
-        tok.AddChar(token.RBRACE, l.ch)
+		tok.AddChar(token.RBRACE, l.ch)
 	case 1:
-        // If we ended in a new line, we will go to the next line, read a new character and then call the next token on it.
-        l.nextLine()
-        l.readChar()
-        return l.NextToken()
+		// If we ended in a new line, we will go to the next line, read a new character and then call the next token on it.
+		l.nextLine()
+		l.readChar()
+		return l.NextToken()
 	case 0:
-        tok.AddStr(token.EOF, "")
+		tok.AddStr(token.EOF, "")
 	default:
 		if isLetter(l.ch) {
 			literal := l.readCharUntil(isLetter)
 			tokeyType := token.LookupIdent(literal)
-            tok.AddStr(tokeyType, literal)
+			tok.AddStr(tokeyType, literal)
 			return tok
 		} else if isDigit(l.ch) {
 			literal := l.readCharUntil(isDigit)
-            tok.AddStr(token.INT, literal)
+			tok.AddStr(token.INT, literal)
 			return tok
 		} else {
-            tok.AddChar(token.ILLEGAL, l.ch)
+			tok.AddChar(token.ILLEGAL, l.ch)
 		}
 	}
 

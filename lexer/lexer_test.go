@@ -21,11 +21,11 @@ let ten = 10;
 		{token.ASSIGN, "=", 0, 9},
 		{token.INT, "5", 0, 11},
 		{token.SEMICOLON, ";", 0, 12},
-        {token.LET, "let", 1, 0},
-        {token.IDENT, "ten", 1, 4},
-        {token.ASSIGN, "=", 1, 8},
-        {token.INT, "10", 1, 10},
-        {token.SEMICOLON, ";", 1, 12},
+		{token.LET, "let", 1, 0},
+		{token.IDENT, "ten", 1, 4},
+		{token.ASSIGN, "=", 1, 8},
+		{token.INT, "10", 1, 10},
+		{token.SEMICOLON, ";", 1, 12},
 	}
 
 	l := New(input)
@@ -41,12 +41,12 @@ let ten = 10;
 		}
 
 		if tok.Line != tt.expectedLine {
-            t.Fatalf("tests[%d] - line wrong. expected=%d, got=%d", i, tt.expectedLine, tok.Line)
+			t.Fatalf("tests[%d] - line wrong. expected=%d, got=%d", i, tt.expectedLine, tok.Line)
 		}
 
-        if tok.Column != tt.expectedColumn {
-            t.Fatalf("tests[%d] - column wrong. expected=%d, got=%d", i, tt.expectedColumn, tok.Column)
-        }
+		if tok.Column != tt.expectedColumn {
+			t.Fatalf("tests[%d] - column wrong. expected=%d, got=%d", i, tt.expectedColumn, tok.Column)
+		}
 	}
 }
 

@@ -5,17 +5,17 @@ type TokenType string
 type Token struct {
 	Type    TokenType
 	Literal string
-    Line    int
-    Column  int
+	Line    int
+	Column  int
 }
 
 func (t *Token) AddChar(tokenType TokenType, ch byte) {
-    t.AddStr(tokenType, string(ch))
+	t.AddStr(tokenType, string(ch))
 }
 
 func (t *Token) AddStr(tokenType TokenType, str string) {
-    t.Type = tokenType
-    t.Literal = str
+	t.Type = tokenType
+	t.Literal = str
 }
 
 const (
@@ -32,9 +32,9 @@ const (
 	ASTERISK = "*"
 	SLASH    = "/"
 
-	LT = ">"
-	GT = "<"
-	EQ = "=="
+	LT     = ">"
+	GT     = "<"
+	EQ     = "=="
 	NOT_EQ = "!="
 
 	COMMA     = ","
@@ -55,12 +55,12 @@ const (
 )
 
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
-	"true": TRUE,
-	"false": FALSE,
-	"if": IF,
-	"else": ELSE,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
 	"return": RETURN,
 }
 
