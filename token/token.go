@@ -5,6 +5,17 @@ type TokenType string
 type Token struct {
 	Type    TokenType
 	Literal string
+    Line    int
+    Column  int
+}
+
+func (t *Token) AddChar(tokenType TokenType, ch byte) {
+    t.AddStr(tokenType, string(ch))
+}
+
+func (t *Token) AddStr(tokenType TokenType, str string) {
+    t.Type = tokenType
+    t.Literal = str
 }
 
 const (

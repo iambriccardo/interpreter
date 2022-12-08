@@ -113,7 +113,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currToken.Type]
 	if prefix == nil {
-		msg := fmt.Sprintf("the token %q is not supported", p.currToken.Type)
+		msg := fmt.Sprintf("main.mk:%d:%d: the token %q is not supported", p.currToken.Line, p.currToken.Column, p.currToken.Type)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
@@ -140,7 +140,7 @@ func (p *Parser) parseIdentifier() ast.Expression {
 func (p *Parser) parseIntegerLiteral() ast.Expression {
 	intValue, err := strconv.ParseInt(p.currToken.Literal, 0, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer", p.currToken.Literal)
+        msg := fmt.Sprintf("main.mk:%d:%d: could not parse %q as integer", p.currToken.Line, p.currToken.Column, p.currToken.Literal)
 		p.errors = append(p.errors, msg)
 
 		return nil
@@ -181,7 +181,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 func (p *Parser) parseBoolean() ast.Expression {
 	boolValue, err := strconv.ParseBool(p.currToken.Literal)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as bool", p.currToken.Literal)
+        msg := fmt.Sprintf("main.mk:%d:%d: could not parse %q as bool", p.currToken.Line, p.currToken.Column, p.currToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
@@ -248,7 +248,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	}
 
 	if p.currTokenIs(token.EOF) {
-		msg := fmt.Sprintf("the block is not terminated with '{'")
+        msg := fmt.Sprintf("main.mk:%d:%d: the block is not terminated with '{'", p.currToken.Line, p.currToken.Column)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
@@ -370,7 +370,7 @@ func (p *Parser) peekAndAdvanceIf(t token.TokenType) bool {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
+    msg := fmt.Sprintf("main.mk:%d:%d: expected next token to be %s, got %s instead", p.currToken.Line, p.currToken.Column, t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
