@@ -28,6 +28,10 @@ func Eval(node ast.Node) object.Object {
 		left := Eval(node.Left)
 		right := Eval(node.Right)
 		return evalInfixExpression(node.Operator, left, right)
+	case *ast.BlockStatement:
+		return evalStatements(node.Statements)
+	case *ast.IfExpression:
+		return evalIfExpression(node)
 	}
 
 	return nil
@@ -85,13 +89,13 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 }
 
 func evalInfixExpression(operator string, left object.Object, right object.Object) object.Object {
-    switch {
-    case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
+	switch {
+	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
 	case operator == "==":
-        return evalBoolean(left == right)
-    case operator == "!=":
-        return evalBoolean(left != right)
+		return evalBoolean(left == right)
+	case operator == "!=":
+		return evalBoolean(left != right)
 	default:
 		return NULL
 	}
@@ -111,14 +115,39 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 	case "/":
 		return &object.Integer{Value: leftValue / rightValue}
 	case "<":
-        return evalBoolean(leftValue < rightValue)
+		return evalBoolean(leftValue < rightValue)
 	case ">":
-        return evalBoolean(leftValue > rightValue)
+		return evalBoolean(leftValue > rightValue)
 	case "==":
-        return evalBoolean(leftValue == rightValue)
+		return evalBoolean(leftValue == rightValue)
 	case "!=":
-        return evalBoolean(leftValue != rightValue)
+		return evalBoolean(leftValue != rightValue)
 	default:
 		return NULL
+	}
+}
+
+func evalIfExpression(ifExpression *ast.IfExpression) object.Object {
+	condition := Eval(ifExpression.Condition)
+
+	if isTruthy(condition) {
+		return Eval(ifExpression.Consequence)
+	} else if ifExpression.Alternative != nil {
+		return Eval(ifExpression.Alternative)
+	} else {
+		return NULL
+	}
+}
+
+func isTruthy(obj object.Object) bool {
+	switch obj {
+	case NULL:
+		return false
+	case TRUE:
+		return true
+	case FALSE:
+		return false
+	default:
+		return true
 	}
 }
