@@ -58,7 +58,7 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) peekAhead() byte {
-	if l.peekPosition >= len(l.input) {
+    if l.peekPosition >= len(l.input[l.inputLine]) {
 		return 0
 	} else {
 		return l.input[l.inputLine][l.peekPosition]
@@ -96,7 +96,7 @@ func New(input string) *Lexer {
 }
 
 func (l *Lexer) NextToken() token.Token {
-	var tok token.Token = token.Token{}
+	var tok = token.Token{}
 
 	// We continue reading until we find l.ch that is not a whitespace.
 	l.skipWhitespace()

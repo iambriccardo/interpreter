@@ -113,7 +113,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currToken.Type]
 	if prefix == nil {
-		msg := fmt.Sprintf("main.mk:%d:%d: the token %q is not supported", p.currToken.Line, p.currToken.Column, p.currToken.Type)
+		msg := fmt.Sprintf("%d:%d: the token %q is not supported", p.currToken.Line, p.currToken.Column, p.currToken.Type)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
