@@ -79,5 +79,5 @@ func (e *Error) Type() ObjectType {
 }
 
 func (e *Error) Inspect() string {
-	return "Runtime error: " + e.Message
+	return e.Message
 }
