@@ -58,7 +58,7 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) peekAhead() byte {
-    if l.peekPosition >= len(l.input[l.inputLine]) {
+	if l.peekPosition >= len(l.input[l.inputLine]) {
 		return 0
 	} else {
 		return l.input[l.inputLine][l.peekPosition]

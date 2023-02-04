@@ -1,10 +1,10 @@
 package object
 
 import (
-    "bytes"
-    "fmt"
+	"bytes"
+	"fmt"
 	"monkey/ast"
-    "strings"
+	"strings"
 )
 
 type ObjectType string
