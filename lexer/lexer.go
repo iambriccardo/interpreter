@@ -35,6 +35,27 @@ func (l *Lexer) readChar() {
 	l.peekPosition += 1
 }
 
+func (l *Lexer) readString() string {
+    value := ""
+
+    for {
+        l.readChar()
+
+        if l.ch == 1 {
+            l.nextLine()
+            continue
+        }
+
+        if l.ch == '"' || l.ch == 0 {
+            break
+        }
+
+        value += string(l.ch)
+    }
+
+    return value
+}
+
 func (l *Lexer) readCharUntil(block func(byte) bool) string {
 	position := l.position
 	for block(l.ch) {
@@ -142,6 +163,9 @@ func (l *Lexer) NextToken() token.Token {
 		tok.AddChar(token.LBRACE, l.ch)
 	case '}':
 		tok.AddChar(token.RBRACE, l.ch)
+	case '"':
+        tok.Type = token.STRING
+        tok.Literal = l.readString()
 	case 1:
 		// If we ended in a new line, we will go to the next line, read a new character and then call the next token on it.
 		l.nextLine()

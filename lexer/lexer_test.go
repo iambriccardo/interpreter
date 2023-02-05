@@ -70,6 +70,10 @@ return false;
 
 10 == 10;
 10 != 9;
+"foobar"
+"foo bar"
+"my
+string"
 `
 
 	tests := []struct {
@@ -149,7 +153,10 @@ return false;
 		{token.NOT_EQ, "!="},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
-		{token.EOF, ""},
+        {token.STRING, "foobar"},
+        {token.STRING, "foo bar"},
+        {token.STRING, "mystring"},
+        {token.EOF, ""},
 	}
 
 	l := New(input)

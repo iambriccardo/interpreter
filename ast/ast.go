@@ -132,6 +132,22 @@ func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
 
+// "foo"
+type StringLiteral struct {
+    Token token.Token
+    Value string
+}
+
+func (il *StringLiteral) expressionNode() {}
+
+func (il *StringLiteral) TokenLiteral() string {
+    return il.Token.Literal
+}
+
+func (il *StringLiteral) String() string {
+    return il.Token.Literal
+}
+
 // !5
 type PrefixExpression struct {
 	Token    token.Token
