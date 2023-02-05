@@ -210,7 +210,7 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 
 func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
 	if operator != "+" {
-        return newError("UnknownOperatorError: %s %s %s", left.Type(), operator, right.Type())
+		return newError("UnknownOperatorError: %s %s %s", left.Type(), operator, right.Type())
 	}
 
 	leftVal := left.(*object.String).Value

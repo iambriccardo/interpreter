@@ -153,10 +153,10 @@ string"
 		{token.NOT_EQ, "!="},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
-        {token.STRING, "foobar"},
-        {token.STRING, "foo bar"},
-        {token.STRING, "mystring"},
-        {token.EOF, ""},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
+		{token.STRING, "mystring"},
+		{token.EOF, ""},
 	}
 
 	l := New(input)

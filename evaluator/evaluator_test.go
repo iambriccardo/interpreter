@@ -183,7 +183,7 @@ func TestErrorHandling(t *testing.T) {
 		{"if (10 > 1) { true + false; }", "UnknownOperatorError: BOOLEAN + BOOLEAN"},
 		{"if (10 > 1) { if (10 > 1) { return true + false; } return 1;}", "UnknownOperatorError: BOOLEAN + BOOLEAN"},
 		{"foobar", "IdentifierNotFoundError: foobar"},
-        { `"Hello" - "World"`, "UnknownOperatorError: STRING - STRING"},
+		{`"Hello" - "World"`, "UnknownOperatorError: STRING - STRING"},
 	}
 
 	for _, tt := range tests {

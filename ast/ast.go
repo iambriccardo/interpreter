@@ -134,18 +134,18 @@ func (il *IntegerLiteral) String() string {
 
 // "foo"
 type StringLiteral struct {
-    Token token.Token
-    Value string
+	Token token.Token
+	Value string
 }
 
 func (il *StringLiteral) expressionNode() {}
 
 func (il *StringLiteral) TokenLiteral() string {
-    return il.Token.Literal
+	return il.Token.Literal
 }
 
 func (il *StringLiteral) String() string {
-    return il.Token.Literal
+	return il.Token.Literal
 }
 
 // !5
