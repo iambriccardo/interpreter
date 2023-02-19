@@ -35,8 +35,11 @@ func Start(in io.Reader, out io.Writer) {
 
 		evaluated := evaluator.Eval(program, env)
 		if evaluated != nil {
-			io.WriteString(out, evaluated.Inspect())
-			io.WriteString(out, "\n")
+            if _, ok := evaluated.(*object.Null); !ok {
+                io.WriteString(out, evaluated.Inspect())
+                io.WriteString(out, "\n")
+            }
+
 			if _, ok := evaluated.(*object.Error); ok {
 				io.WriteString(out, "Execution stopped due to an error.\n")
 				return
