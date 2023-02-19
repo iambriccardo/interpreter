@@ -341,5 +341,57 @@ func (ce *CallExpression) String() string {
 	out.WriteString(")")
 
 	return out.String()
+}
 
+// [1, 3, "four", fn() {}]
+type ArrayLiteral struct {
+	Token  token.Token
+	Values []Expression
+}
+
+func (al *ArrayLiteral) expressionNode() {}
+
+func (al *ArrayLiteral) TokenLiteral() string {
+	return al.Token.Literal
+}
+
+func (al *ArrayLiteral) String() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, p := range al.Values {
+		elements = append(elements, p.String())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+// array[0]
+type IndexExpression struct {
+	Token token.Token // The [
+    Left Expression
+	Index Expression
+}
+
+func (ie *IndexExpression) expressionNode() {}
+
+func (ie *IndexExpression) TokenLiteral() string {
+    return ie.Token.Literal
+}
+
+func (ie *IndexExpression) String() string {
+    var out bytes.Buffer
+
+    out.WriteString("(")
+    out.WriteString(ie.Left.String())
+    out.WriteString("[")
+    out.WriteString(ie.Index.String())
+    out.WriteString("]")
+    out.WriteString(")")
+
+    return out.String()
 }

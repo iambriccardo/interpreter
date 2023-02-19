@@ -17,6 +17,7 @@ const (
 	PRODUCT     // *
 	PREFIX      // -X or !X
 	CALL        // myFunction(X)
+    INDEX       // array[index]
 )
 
 var precedences = map[token.TokenType]int{
@@ -29,6 +30,7 @@ var precedences = map[token.TokenType]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.LPAREN:   CALL,
+    token.LBRACKET: INDEX,
 }
 
 type (
@@ -279,66 +281,80 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 }
 
 func (p *Parser) parseFunctionParameters() []*ast.Identifier {
-	identifiers := []*ast.Identifier{}
+    identifiers := []*ast.Identifier{}
 
-	if p.peekTokenIs(token.RPAREN) {
-		p.nextToken()
-		return identifiers
-	}
+    if p.peekTokenIs(token.RPAREN) {
+        p.nextToken()
+        return identifiers
+    }
 
-	p.nextToken()
-	ident := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
-	identifiers = append(identifiers, ident)
+    p.nextToken()
+    ident := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+    identifiers = append(identifiers, ident)
 
-	for p.peekTokenIs(token.COMMA) {
-		p.nextToken()
-		p.nextToken()
+    for p.peekTokenIs(token.COMMA) {
+        p.nextToken()
+        p.nextToken()
 
-		ident := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
-		identifiers = append(identifiers, ident)
-	}
+        ident := &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+        identifiers = append(identifiers, ident)
+    }
 
-	if !p.peekAndAdvanceIf(token.RPAREN) {
-		return nil
-	}
+    if !p.peekAndAdvanceIf(token.RPAREN) {
+        return nil
+    }
 
-	return identifiers
+    return identifiers
 }
+
+func (p *Parser) parseArrayLiteral() ast.Expression {
+    return &ast.ArrayLiteral{Token: p.currToken, Values: p.parseExpressionList(token.RBRACKET)}
+ }
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
-	expression := &ast.CallExpression{
+	return &ast.CallExpression{
 		Token:    p.currToken,
 		Function: function,
-	}
-
-	expression.Arguments = p.parseCallArguments()
-
-	return expression
+        Arguments: p.parseExpressionList(token.RPAREN),
+    }
 }
 
-func (p *Parser) parseCallArguments() []ast.Expression {
-	args := []ast.Expression{}
+func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+    expressions := []ast.Expression{}
 
-	// We have a function with 0 arguments.
-	if p.peekTokenIs(token.RPAREN) {
-		p.nextToken()
-		return args
-	}
+    if p.peekTokenIs(end) {
+        p.nextToken()
+        return expressions
+    }
 
-	p.nextToken()
-	args = append(args, p.parseExpression(LOWEST))
+    p.nextToken()
+    expressions = append(expressions, p.parseExpression(LOWEST))
 
-	for p.peekTokenIs(token.COMMA) {
-		p.nextToken()
-		p.nextToken()
-		args = append(args, p.parseExpression(LOWEST))
-	}
+    for p.peekTokenIs(token.COMMA) {
+        p.nextToken()
+        p.nextToken()
 
-	if !p.peekAndAdvanceIf(token.RPAREN) {
-		return nil
-	}
+        expressions = append(expressions, p.parseExpression(LOWEST))
+    }
 
-	return args
+    if !p.peekAndAdvanceIf(end) {
+        return nil
+    }
+
+    return expressions
+}
+
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+    indexExpression := &ast.IndexExpression{Token: p.currToken, Left: left}
+
+    p.nextToken()
+    indexExpression.Index = p.parseExpression(LOWEST)
+
+    if !p.peekAndAdvanceIf(token.RBRACKET) {
+        return nil
+    }
+
+    return indexExpression
 }
 
 /* UTILS */
@@ -412,6 +428,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
+    p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -423,6 +440,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+    p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
 	// We read two tokens in order to have both currToken and peekToken set.
 	p.nextToken()

@@ -74,6 +74,7 @@ return false;
 "foo bar"
 "my
 string"
+[1, 2];
 `
 
 	tests := []struct {
@@ -156,6 +157,12 @@ string"
 		{token.STRING, "foobar"},
 		{token.STRING, "foo bar"},
 		{token.STRING, "mystring"},
+        {token.LBRACKET, "["},
+        {token.INT, "1"},
+        {token.COMMA, ","},
+        {token.INT, "2"},
+        {token.RBRACKET, "]"},
+        {token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 
