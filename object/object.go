@@ -3,6 +3,7 @@ package object
 import (
 	"bytes"
 	"fmt"
+	"hash/fnv"
 	"monkey/ast"
 	"strings"
 )
@@ -17,9 +18,41 @@ const (
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
-    BUILTIN_OBJ = "BUILTIN"
-    ARRAY_OBJ = "ARRAY"
+	BUILTIN_OBJ      = "BUILTIN"
+	ARRAY_OBJ        = "ARRAY"
+	HASH_OBJ         = "HASH"
 )
+
+type Hashable interface {
+    HashKey() HashKey
+}
+
+type HashKey struct {
+	Type  ObjectType
+	Value uint64
+}
+
+func (b *Boolean) HashKey() HashKey {
+	var value uint64
+
+	if b.Value {
+		value = 1
+	} else {
+		value = 0
+	}
+
+	return HashKey{Type: b.Type(), Value: value}
+}
+
+func (i *Integer) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
+
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write([]byte(s.Value))
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
+}
 
 type Object interface {
 	Type() ObjectType
@@ -134,36 +167,65 @@ func (f *Function) Inspect() string {
 // Function built-in into the interpreter.
 type BuiltinFunction func(args ...Object) Object
 
-type Builtin struct { Fn BuiltinFunction }
+type Builtin struct{ Fn BuiltinFunction }
 
 func (b *Builtin) Type() ObjectType {
-    return BUILTIN_OBJ
+	return BUILTIN_OBJ
 }
 
 func (b *Builtin) Inspect() string {
-    return "builtin function"
+	return "builtin function"
 }
 
 // array = [1,2,3]
 type Array struct {
-    Values []Object
+	Values []Object
 }
 
 func (a *Array) Type() ObjectType {
-    return ARRAY_OBJ
+	return ARRAY_OBJ
 }
 
 func (a *Array) Inspect() string {
-    var out bytes.Buffer
+	var out bytes.Buffer
 
-    params := []string{}
-    for _, p := range a.Values {
-        params = append(params, p.Inspect())
-    }
+	params := []string{}
+	for _, p := range a.Values {
+		params = append(params, p.Inspect())
+	}
 
-    out.WriteString("[")
-    out.WriteString(strings.Join(params, ", "))
-    out.WriteString("]")
+	out.WriteString("[")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString("]")
 
-    return out.String()
+	return out.String()
+}
+
+// {"one": 1, "two": 2}
+type HashPair struct {
+	Key   Object
+	Value Object
+}
+
+type Hash struct {
+	Pairs map[HashKey]HashPair
+}
+
+func (h *Hash) Type() ObjectType {
+	return HASH_OBJ
+}
+
+func (h *Hash) Inspect() string {
+	var out bytes.Buffer
+
+	pairs := []string{}
+	for _, pair := range h.Pairs {
+		pairs = append(pairs, fmt.Sprintf("%s: %s", pair.Key.Inspect(), pair.Value.Inspect()))
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+
+	return out.String()
 }

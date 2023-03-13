@@ -311,6 +311,37 @@ func (p *Parser) parseArrayLiteral() ast.Expression {
     return &ast.ArrayLiteral{Token: p.currToken, Values: p.parseExpressionList(token.RBRACKET)}
  }
 
+func (p *Parser) parseHashLiteral() ast.Expression {
+     return &ast.HashLiteral{Token: p.currToken, Pairs: p.parseHashExpression()}
+}
+
+func (p *Parser) parseHashExpression() map[ast.Expression]ast.Expression {
+    expressions := make(map[ast.Expression]ast.Expression)
+
+    for !p.peekTokenIs(token.RBRACE) {
+        p.nextToken()
+        keyExpression := p.parseExpression(LOWEST)
+
+        if !p.peekAndAdvanceIf(token.COLON) {
+            return nil
+        }
+
+        p.nextToken()
+        valueExpression := p.parseExpression(LOWEST)
+        expressions[keyExpression] = valueExpression
+
+        if !p.peekTokenIs(token.RBRACE) && !p.peekAndAdvanceIf(token.COMMA) {
+            return nil
+        }
+    }
+
+    if !p.peekAndAdvanceIf(token.RBRACE) {
+        return nil
+    }
+
+    return expressions
+}
+
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	return &ast.CallExpression{
 		Token:    p.currToken,
@@ -429,6 +460,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
     p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
+    p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)

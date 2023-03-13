@@ -153,6 +153,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok.AddChar(token.GT, l.ch)
 	case ';':
 		tok.AddChar(token.SEMICOLON, l.ch)
+	case ':':
+        tok.AddChar(token.COLON, l.ch)
 	case ',':
 		tok.AddChar(token.COMMA, l.ch)
 	case '(':
